@@ -1,11 +1,11 @@
-package com.r8booster
+package io.github.cdsap.r8booster
 
+import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import java.io.File
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.TaskOutcome
 
 class KotlinDaemonKillerPluginTest {
 
@@ -39,7 +39,7 @@ class KotlinDaemonKillerPluginTest {
         projectDir.writeBuildGradle(
             """
             plugins {
-                id("com.r8booster.kotlin-daemon-killer")
+                id("io.github.cdsap.r8booster")
             }
 
             repositories {

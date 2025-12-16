@@ -1,4 +1,4 @@
-package com.r8booster
+package io.github.cdsap.r8booster
 
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
@@ -7,7 +7,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
-import org.gradle.process.ExecException
 import org.gradle.process.ExecOperations
 
 interface KillKotlinCompileDaemonParameters : ValueSourceParameters {
@@ -34,7 +33,7 @@ abstract class KillKotlinCompileDaemonValueSource :
                 }
             }
             String(output.toByteArray(), Charset.defaultCharset())
-        } catch (e: ExecException) {
+        } catch (e: Exception) {
             String(error.toByteArray(), Charset.defaultCharset())
         }
     }

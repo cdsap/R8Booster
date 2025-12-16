@@ -1,4 +1,4 @@
-package com.r8booster
+package io.github.cdsap.r8booster
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
@@ -19,6 +19,6 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
     @TaskAction
     fun killDaemons() {
         val output = kotlinDaemonKillInfo.get()
-        logger.lifecycle("Kill Kotlin compile daemon command executed. Output: ${'$'}output")
+        logger.lifecycle("Kill Kotlin compile daemon command executed. Output: $output")
     }
 }
