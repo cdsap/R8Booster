@@ -5,6 +5,9 @@ import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.tasks.R8Task
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.withType
+import java.util.Locale
 
 class KotlinDaemonKillerPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -21,21 +24,19 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
         }
         with(project) {
 
-            val androidComponents =
-                extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
             plugins.withType(AppPlugin::class.java) {
-                androidComponents.onVariants { variant ->
-                    tasks.withType(R8Task::class.java).configureEach {
+                val androidComponents =
+                    extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+                androidComponents.onVariants(androidComponents.selector().withBuildType("release")) { variant ->
+
+                    val variantName =
+                        variant.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                    killTask.configure {
+                        dependsOn(tasks.named("compile${variantName}Kotlin"))
+                    }
+                    tasks.withType<R8Task>().configureEach {
                         dependsOn(killTask)
                     }
-                    killTask.configure {
-                    //    dependsOn(tasks.withType<KotlinCompile>())
-                    }
-                }
-            }
-            project.afterEvaluate {
-                project.tasks.named("minifyReleaseWithR8") {
-                    dependsOn(killTask)
                 }
             }
         }

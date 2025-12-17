@@ -18,7 +18,7 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
 
     @TaskAction
     fun killDaemons() {
-        val output = kotlinDaemonKillInfo.get()
-        logger.lifecycle("Kill Kotlin compile daemon command executed. Output: $output")
+        kotlinDaemonKillInfo.get()
+        logger.lifecycle("Kill Kotlin compile daemon command executed")
     }
 }

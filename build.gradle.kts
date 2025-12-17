@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.cdsap.r8booster"
-version = "0.0.1"
+version = "0.0.2"
 
 
 
