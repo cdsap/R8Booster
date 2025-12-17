@@ -29,11 +29,6 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
                     extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
                 androidComponents.onVariants(androidComponents.selector().withBuildType("release")) { variant ->
 
-                    val variantName =
-                        variant.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                    killTask.configure {
-                        dependsOn(tasks.named("compile${variantName}Kotlin"))
-                    }
                     tasks.withType<R8Task>().configureEach {
                         dependsOn(killTask)
                     }
