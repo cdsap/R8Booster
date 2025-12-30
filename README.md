@@ -18,7 +18,7 @@ Add the plugin to your root `build.gradle.kts` or `build.gradle`:
 
 ```kotlin
 plugins {
-    id("io.github.cdsap.r8booster") version "0.0.1"
+    id("io.github.cdsap.r8booster") version "0.0.5"
 }
 ```
 
@@ -31,7 +31,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("io.github.cdsap.r8booster:r8booster:0.0.1")
+        classpath("io.github.cdsap.r8booster:r8booster:0.0.5")
     }
 }
 
