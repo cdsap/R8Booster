@@ -20,8 +20,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.14.3
 
       - name: Build and test
-        run: gradle build --stacktrace
+        run: ./gradlew build --stacktrace
