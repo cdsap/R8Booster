@@ -6,7 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 class KotlinDaemonKillerPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -27,7 +27,7 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
                 val androidComponents =
                     extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
                 androidComponents.onVariants(androidComponents.selector().withBuildType("release")) {
-                    tasks.withType<KotlinCompile>().configureEach {
+                    tasks.withType<KotlinCompilationTask<*>>().configureEach {
                         finalizedBy(killTask)
                     }
 

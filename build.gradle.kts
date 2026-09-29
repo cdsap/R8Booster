@@ -12,9 +12,8 @@ group = "io.github.cdsap.r8booster"
 version = "0.0.5"
 
 dependencies {
-    compileOnly("com.android.tools.build:gradle:8.13.1")
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
-    implementation(gradleApi())
+    compileOnly("com.android.tools.build:gradle-api:8.13.1")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin-api:2.2.21")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter")

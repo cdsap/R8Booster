@@ -36,7 +36,8 @@ class ConfigurationCacheFunctionalTest {
             .withArguments(
                 "killKotlinCompileDaemon",
                 "--configuration-cache",
-                "--configuration-cache-problems=fail"
+                "--configuration-cache-problems=fail",
+                "--isolated-projects",
             )
             .forwardOutput()
 
