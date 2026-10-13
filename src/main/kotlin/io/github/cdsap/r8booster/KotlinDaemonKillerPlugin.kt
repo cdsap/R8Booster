@@ -4,7 +4,6 @@ import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
@@ -32,7 +31,7 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
                     }
 
                     tasks.withType<JavaCompile>().configureEach {
-                        dependsOn(tasks.named<KillKotlinCompileDaemonTask>("killKotlinCompileDaemon"))
+                        dependsOn(killTask)
                     }
                 }
             }
