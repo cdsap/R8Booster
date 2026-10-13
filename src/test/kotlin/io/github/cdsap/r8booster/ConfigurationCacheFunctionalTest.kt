@@ -53,4 +53,28 @@ class ConfigurationCacheFunctionalTest {
             "Expected configuration cache HIT on second run:\n${second.output}"
         )
     }
+
+    @Test
+    fun `killKotlinCompileDaemon succeeds when the kill command fails`() {
+        testProjectDir.resolve("build.gradle.kts").appendText(
+            """
+
+            tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
+                kotlinDaemonKillInfo.set("exit 42")
+            }
+            """.trimIndent()
+        )
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath()
+            .withArguments("killKotlinCompileDaemon")
+            .forwardOutput()
+            .build()
+
+        assertTrue(
+            result.output.contains("Kill Kotlin compile daemon command executed"),
+            "Expected kill task lifecycle logging:\n${result.output}"
+        )
+    }
 }
