@@ -1,5 +1,6 @@
 package io.github.cdsap.r8booster
 
+import java.io.ByteArrayOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -15,7 +16,7 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
     abstract val execOperations: ExecOperations
 
     @get:Input
-    abstract val kotlinDaemonKillInfo: Property<String>
+    abstract val command: Property<String>
 
     init {
         group = "verification"
@@ -25,9 +26,13 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
 
     @TaskAction
     fun killDaemons() {
+        val output = ByteArrayOutputStream()
+        val error = ByteArrayOutputStream()
         try {
             execOperations.exec {
-                commandLine("sh", "-c", kotlinDaemonKillInfo.get())
+                commandLine("sh", "-c", command.get())
+                standardOutput = output
+                errorOutput = error
                 isIgnoreExitValue = true
             }
         } catch (ignored: Exception) {

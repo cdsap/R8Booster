@@ -56,11 +56,12 @@ class ConfigurationCacheFunctionalTest {
 
     @Test
     fun `killKotlinCompileDaemon succeeds when the kill command fails`() {
+        val marker = testProjectDir.resolve("kill-command-executed")
         testProjectDir.resolve("build.gradle.kts").appendText(
             """
 
             tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
-                kotlinDaemonKillInfo.set("exit 42")
+                command.set("touch '${marker.absolutePath}'; exit 42")
             }
             """.trimIndent()
         )
@@ -72,6 +73,7 @@ class ConfigurationCacheFunctionalTest {
             .forwardOutput()
             .build()
 
+        assertTrue(marker.isFile, "Expected the kill command to run from the task action")
         assertTrue(
             result.output.contains("Kill Kotlin compile daemon command executed"),
             "Expected kill task lifecycle logging:\n${result.output}"
