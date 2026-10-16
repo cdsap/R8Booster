@@ -79,4 +79,29 @@ class ConfigurationCacheFunctionalTest {
             "Expected kill task lifecycle logging:\n${result.output}"
         )
     }
+
+    @Test
+    fun `kill command is not executed during configuration`() {
+        val marker = testProjectDir.resolve("kill-command-executed-during-configuration")
+        testProjectDir.resolve("build.gradle.kts").appendText(
+            """
+
+            tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
+                command.set("touch '${marker.absolutePath}'")
+            }
+            """.trimIndent()
+        )
+
+        GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath()
+            .withArguments("help")
+            .forwardOutput()
+            .build()
+
+        assertTrue(
+            !marker.exists(),
+            "Expected the kill command to run only during killKotlinCompileDaemon execution"
+        )
+    }
 }
