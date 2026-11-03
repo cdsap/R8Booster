@@ -25,12 +25,9 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
 
     @TaskAction
     fun killDaemons() {
-        try {
-            execOperations.exec {
-                commandLine("sh", "-c", command.get())
-                isIgnoreExitValue = true
-            }
-        } catch (ignored: Exception) {
+        execOperations.exec {
+            commandLine("sh", "-c", command.get())
+            isIgnoreExitValue = true
         }
         logger.lifecycle("Kill Kotlin compile daemon command executed")
     }
