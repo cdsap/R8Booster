@@ -30,6 +30,14 @@ class ConfigurationCacheFunctionalTest {
 
     @Test
     fun `killKotlinCompileDaemon is configuration cache compatible`() {
+        testProjectDir.resolve("build.gradle.kts").appendText(
+            """
+
+            tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
+                command.set("printf 'harmless-command-executed\\n'")
+            }
+            """.trimIndent()
+        )
         val runner = GradleRunner.create()
             .withProjectDir(testProjectDir)
             .withPluginClasspath()
@@ -42,12 +50,14 @@ class ConfigurationCacheFunctionalTest {
             .forwardOutput()
 
         val first = runner.build()
+        assertTrue(first.output.contains("harmless-command-executed"), "Expected harmless command to run on first build")
         assertTrue(
             first.output.contains("Configuration cache entry stored"),
             "Expected configuration cache to be stored on first run:\n${first.output}"
         )
 
         val second = runner.build()
+        assertTrue(second.output.contains("harmless-command-executed"), "Expected harmless command to run on second build")
         assertTrue(
             second.output.contains("Configuration cache entry reused"),
             "Expected configuration cache HIT on second run:\n${second.output}"
