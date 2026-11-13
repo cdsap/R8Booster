@@ -15,7 +15,7 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
                 KillKotlinCompileDaemonTask::class.java
             )
             killTask.configure {
-                command.set(KillKotlinCompileDaemonTask.DEFAULT_COMMAND)
+                commandLine.set(KotlinDaemonKillCommand.commandLine)
             }
 
             // Use withPlugin(id) so AGP classes are only loaded when the Android

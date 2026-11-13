@@ -1,7 +1,7 @@
 package io.github.cdsap.r8booster
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
@@ -15,7 +15,7 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
     abstract val execOperations: ExecOperations
 
     @get:Input
-    abstract val command: Property<String>
+    abstract val commandLine: ListProperty<String>
 
     init {
         group = "verification"
@@ -25,15 +25,11 @@ abstract class KillKotlinCompileDaemonTask : DefaultTask() {
 
     @TaskAction
     fun killDaemons() {
+        val arguments = commandLine.get()
         execOperations.exec {
-            commandLine("sh", "-c", command.get())
+            commandLine(arguments)
             isIgnoreExitValue = true
         }
         logger.lifecycle("Kill Kotlin compile daemon command executed")
-    }
-
-    companion object {
-        const val DEFAULT_COMMAND =
-            "jps | grep -E \"KotlinCompileDaemon\" | awk '{print \$1}' | xargs -r kill -9"
     }
 }
