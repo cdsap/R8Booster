@@ -34,7 +34,7 @@ class ConfigurationCacheFunctionalTest {
             """
 
             tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
-                command.set("printf 'harmless-command-executed\\n'")
+                commandLine.set(listOf("sh", "-c", "printf 'harmless-command-executed\\n'"))
             }
             """.trimIndent()
         )
@@ -71,7 +71,7 @@ class ConfigurationCacheFunctionalTest {
             """
 
             tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
-                command.set("touch '${marker.absolutePath}'; exit 42")
+                commandLine.set(listOf("sh", "-c", "touch '${marker.absolutePath}'; exit 42"))
             }
             """.trimIndent()
         )
@@ -97,7 +97,7 @@ class ConfigurationCacheFunctionalTest {
             """
 
             tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
-                command.set("touch '${marker.absolutePath}'")
+                commandLine.set(listOf("sh", "-c", "touch '${marker.absolutePath}'"))
             }
             """.trimIndent()
         )
