@@ -29,7 +29,7 @@ class ConfigurationCacheFunctionalTest {
     }
 
     @Test
-    fun `killKotlinCompileDaemon is configuration cache compatible`() {
+    fun `killKotlinCompileDaemon executes without Android and reuses configuration cache`() {
         testProjectDir.resolve("build.gradle.kts").appendText(
             """
 
