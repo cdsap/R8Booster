@@ -3,6 +3,7 @@ package io.github.cdsap.r8booster
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.withType
@@ -30,15 +31,26 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
         pluginManager.withPlugin("com.android.application") {
             val androidComponents =
                 extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
+            var killTaskDependenciesWired = false
             androidComponents.onVariants(androidComponents.selector().withBuildType("release")) {
-                tasks.withType<KotlinCompilationTask<*>>().configureEach {
-                    finalizedBy(killTask)
-                }
-
-                tasks.withType<JavaCompile>().configureEach {
-                    dependsOn(killTask)
+                if (!killTaskDependenciesWired) {
+                    killTaskDependenciesWired = true
+                    wireKillTaskDependencies(tasks, killTask)
                 }
             }
+        }
+    }
+
+    private fun wireKillTaskDependencies(
+        tasks: TaskContainer,
+        killTask: TaskProvider<KillKotlinCompileDaemonTask>
+    ) {
+        tasks.withType<KotlinCompilationTask<*>>().configureEach {
+            finalizedBy(killTask)
+        }
+
+        tasks.withType<JavaCompile>().configureEach {
+            dependsOn(killTask)
         }
     }
 }

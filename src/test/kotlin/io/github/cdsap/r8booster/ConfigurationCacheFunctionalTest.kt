@@ -1,8 +1,10 @@
 package io.github.cdsap.r8booster
 
 import java.io.File
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -50,6 +52,7 @@ class ConfigurationCacheFunctionalTest {
             .forwardOutput()
 
         val first = runner.build()
+        assertEquals(TaskOutcome.SUCCESS, first.task(":killKotlinCompileDaemon")?.outcome)
         assertTrue(first.output.contains("harmless-command-executed"), "Expected harmless command to run on first build")
         assertTrue(
             first.output.contains("Configuration cache entry stored"),
@@ -57,6 +60,7 @@ class ConfigurationCacheFunctionalTest {
         )
 
         val second = runner.build()
+        assertEquals(TaskOutcome.SUCCESS, second.task(":killKotlinCompileDaemon")?.outcome)
         assertTrue(second.output.contains("harmless-command-executed"), "Expected harmless command to run on second build")
         assertTrue(
             second.output.contains("Configuration cache entry reused"),
