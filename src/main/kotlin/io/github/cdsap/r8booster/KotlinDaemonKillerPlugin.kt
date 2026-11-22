@@ -1,6 +1,5 @@
 package io.github.cdsap.r8booster
 
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskContainer
@@ -26,18 +25,9 @@ class KotlinDaemonKillerPlugin : Plugin<Project> {
     private fun Project.wireKillTaskIntoAndroidApplicationTasks(
         killTask: TaskProvider<KillKotlinCompileDaemonTask>
     ) {
-        // Use withPlugin(id) so AGP classes are only loaded when the Android
-        // application plugin is present (required for TestKit / non-AGP applies).
+        // Defer compile-task wiring until the Android application plugin is present.
         pluginManager.withPlugin("com.android.application") {
-            val androidComponents =
-                extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
-            var killTaskDependenciesWired = false
-            androidComponents.onVariants(androidComponents.selector().withBuildType("release")) {
-                if (!killTaskDependenciesWired) {
-                    killTaskDependenciesWired = true
-                    wireKillTaskDependencies(tasks, killTask)
-                }
-            }
+            wireKillTaskDependencies(tasks, killTask)
         }
     }
 

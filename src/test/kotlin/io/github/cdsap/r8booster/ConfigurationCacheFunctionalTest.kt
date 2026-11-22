@@ -8,6 +8,8 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class ConfigurationCacheFunctionalTest {
 
@@ -92,6 +94,91 @@ class ConfigurationCacheFunctionalTest {
             result.output.contains("Kill Kotlin compile daemon command executed"),
             "Expected kill task lifecycle logging:\n${result.output}"
         )
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `compile tasks are wired when Android is applied without variant discovery`(androidFirst: Boolean) {
+        val pluginClasspath = GradleRunner.create().withPluginClasspath().pluginClasspath
+            .joinToString(", ") { "\"${it.invariantSeparatorsPath}\"" }
+        // Only the plugin ID matters for project-wide wiring; no Android SDK or variants are needed.
+        testProjectDir.resolve("buildSrc/src/main/java/AndroidApplicationPlugin.java").apply {
+            parentFile.mkdirs()
+            writeText(
+                """
+                import org.gradle.api.Plugin;
+                import org.gradle.api.Project;
+
+                public class AndroidApplicationPlugin implements Plugin<Project> {
+                    public void apply(Project project) {}
+                }
+                """.trimIndent()
+            )
+        }
+        testProjectDir.resolve("buildSrc/build.gradle.kts").writeText(
+            """
+            plugins { `java-gradle-plugin` }
+            repositories { mavenCentral() }
+            dependencies {
+                implementation(files($pluginClasspath))
+                implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20")
+            }
+            gradlePlugin {
+                plugins {
+                    create("androidApplication") {
+                        id = "com.android.application"
+                        implementationClass = "AndroidApplicationPlugin"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        val plugins = if (androidFirst) {
+            """
+            id("com.android.application")
+            id("io.github.cdsap.r8booster")
+            """.trimIndent()
+        } else {
+            """
+            id("io.github.cdsap.r8booster")
+            id("com.android.application")
+            """.trimIndent()
+        }
+        testProjectDir.resolve("build.gradle.kts").writeText(
+            """
+            plugins {
+                kotlin("jvm")
+                $plugins
+            }
+            repositories { mavenCentral() }
+            tasks.named<io.github.cdsap.r8booster.KillKotlinCompileDaemonTask>("killKotlinCompileDaemon") {
+                commandLine.set(listOf("sh", "-c", "printf 'harmless-command-executed\\n'"))
+            }
+            tasks.register<JavaCompile>("extraJavaCompile")
+            """.trimIndent()
+        )
+        val runner = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withArguments(
+                "compileKotlin",
+                "--configuration-cache", "--configuration-cache-problems=fail", "--isolated-projects"
+            )
+            .forwardOutput()
+
+        val first = runner.build()
+        val taskPaths = first.tasks.map { it.path }
+        assertEquals(TaskOutcome.SUCCESS, first.task(":killKotlinCompileDaemon")?.outcome)
+        assertTrue(taskPaths.indexOf(":compileKotlin") < taskPaths.indexOf(":killKotlinCompileDaemon"))
+        assertTrue(first.output.contains("Configuration cache entry stored"))
+
+        val second = runner.build()
+        assertEquals(TaskOutcome.SUCCESS, second.task(":killKotlinCompileDaemon")?.outcome)
+        assertTrue(second.output.contains("Configuration cache entry reused"))
+
+        val javaResult = runner.withArguments("extraJavaCompile").build()
+        assertEquals(TaskOutcome.SUCCESS, javaResult.task(":killKotlinCompileDaemon")?.outcome)
+        val javaTaskPaths = javaResult.tasks.map { it.path }
+        assertTrue(javaTaskPaths.indexOf(":killKotlinCompileDaemon") < javaTaskPaths.indexOf(":extraJavaCompile"))
     }
 
     @Test
