@@ -5,7 +5,7 @@ plugins {
     `java-gradle-plugin`
     `kotlin-dsl`
     `maven-publish`
-    id("com.gradle.plugin-publish") version "2.1.1"
+    id("com.gradle.plugin-publish") version "2.2.1"
 }
 
 group = "io.github.cdsap.r8booster"
@@ -37,8 +37,8 @@ gradlePlugin {
             tags.set(listOf("android", "r8"))
             compatibility {
                 features {
-                    // Declared true only after ConfigurationCacheFunctionalTest proves a CC HIT.
                     configurationCache = true
+                    isolatedProjects = true
                 }
             }
         }

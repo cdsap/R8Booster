@@ -42,16 +42,7 @@ class ConfigurationCacheFunctionalTest {
             }
             """.trimIndent()
         )
-        val runner = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments(
-                "killKotlinCompileDaemon",
-                "--configuration-cache",
-                "--configuration-cache-problems=fail",
-                "--isolated-projects",
-            )
-            .forwardOutput()
+        val runner = gradleRunner("killKotlinCompileDaemon")
 
         val first = runner.build()
         assertEquals(TaskOutcome.SUCCESS, first.task(":killKotlinCompileDaemon")?.outcome)
@@ -82,12 +73,7 @@ class ConfigurationCacheFunctionalTest {
             """.trimIndent()
         )
 
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("killKotlinCompileDaemon")
-            .forwardOutput()
-            .build()
+        val result = gradleRunner("killKotlinCompileDaemon").build()
 
         assertTrue(marker.isFile, "Expected the kill command to run from the task action")
         assertTrue(
@@ -157,13 +143,7 @@ class ConfigurationCacheFunctionalTest {
             tasks.register<JavaCompile>("extraJavaCompile")
             """.trimIndent()
         )
-        val runner = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withArguments(
-                "compileKotlin",
-                "--configuration-cache", "--configuration-cache-problems=fail", "--isolated-projects"
-            )
-            .forwardOutput()
+        val runner = gradleRunner("compileKotlin", withPluginClasspath = false)
 
         val first = runner.build()
         val taskPaths = first.tasks.map { it.path }
@@ -175,7 +155,7 @@ class ConfigurationCacheFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, second.task(":killKotlinCompileDaemon")?.outcome)
         assertTrue(second.output.contains("Configuration cache entry reused"))
 
-        val javaResult = runner.withArguments("extraJavaCompile").build()
+        val javaResult = gradleRunner("extraJavaCompile", withPluginClasspath = false).build()
         assertEquals(TaskOutcome.SUCCESS, javaResult.task(":killKotlinCompileDaemon")?.outcome)
         val javaTaskPaths = javaResult.tasks.map { it.path }
         assertTrue(javaTaskPaths.indexOf(":killKotlinCompileDaemon") < javaTaskPaths.indexOf(":extraJavaCompile"))
@@ -193,16 +173,24 @@ class ConfigurationCacheFunctionalTest {
             """.trimIndent()
         )
 
-        GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("help")
-            .forwardOutput()
-            .build()
+        gradleRunner("help").build()
 
         assertTrue(
             !marker.exists(),
             "Expected the kill command to run only during killKotlinCompileDaemon execution"
         )
     }
+
+    private fun gradleRunner(
+        vararg arguments: String,
+        withPluginClasspath: Boolean = true,
+    ) = GradleRunner.create()
+        .withProjectDir(testProjectDir)
+        .apply { if (withPluginClasspath) withPluginClasspath() }
+        .withArguments(
+            *arguments,
+            "--configuration-cache",
+            "--isolated-projects",
+        )
+        .forwardOutput()
 }
